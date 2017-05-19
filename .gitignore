@@ -1,0 +1,20 @@
+# Ignore all pdf files
+**/*.pdf
+
+# Except in the assignment folder
+!/assignment/**/*.pdf
+
+# All files in the out directory are ignored
+/out/**
+
+# Other ignored file formats
+*.asv
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.m~
+
+*.bbl
+
+*.blg
