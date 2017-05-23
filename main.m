@@ -3,3 +3,5 @@
 % stuff by Dominika
 
 %More stuff by Roni
+
+addpath(genpath('.'));
