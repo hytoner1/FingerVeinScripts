@@ -1,5 +1,8 @@
 % Howto use the miura_* scripts.
 
+cd ~/Dropbox/ACVPR/FingerVeinScripts/;
+addpath(genpath('./'));
+
 img = im2double(imread('finger.png')); % Read the image
 img = imresize(img,0.5);               % Downscale image
 
@@ -9,52 +12,90 @@ img = imresize(img,0.5);               % Downscale image
 % The lee_region() function can be found here:
 
 figure(1); clf;
-    CreateAxes(2,1,1);
+    CreateAxes(3,1,1);
     imshow(img,[]);
 
 [fvr, fve] = lee_region(img,4,40);    % Get finger region
 
-    CreateAxes(2,1,2);
+    CreateAxes(3,1,2);
     imshow(fvr,[]);
     
+%% Find the joints
 
+jointMask = jointFinder(img, fvr);
+img_jMasked= img .* jointMask;
+
+figure(1);
+    CreateAxes(3,1,3);
+    imshow( img_jMasked, [] );
+
+    
 %% Extract veins using maximum curvature method
 sigma = 3; % Parameter
 v_max_curvature = miura_max_curvature(img,fvr,sigma);
+j_max_curvature = miura_max_curvature(img,jointMask,sigma);
 % v_max_curvature = adapthisteq(v_max_curvature);
 
     figure(2); clf;
-    CreateAxes(2,1,1);
+    CreateAxes(2,2,1);
     imshow(v_max_curvature, []);
+    CreateAxes(2,2,2);
+    imshow(j_max_curvature, []);
 
 % Binarise the vein image
 md = median(v_max_curvature(v_max_curvature>0));
 v_max_curvature_bin = v_max_curvature > md; 
-for i = 1:size(v_max_curvature_bin,2);
-    v_max_curvature_bin(fve(:,i),i) = 1;
-end
+
+md_j = median(j_max_curvature(j_max_curvature>0));
+j_max_curvature_bin = j_max_curvature > md_j; 
+
+% for i = 1:size(v_max_curvature_bin,2);
+%     v_max_curvature_bin(fve(:,i),i) = 1;
+% end
+
+    CreateAxes(2,2,3);
+    imshow(v_max_curvature_bin, []);
+    CreateAxes(2,2,4);
+    imshow(j_max_curvature_bin, []);
+    
+
+%% Extract veins using repeated line tracking method
+max_iterations = 3000; r=1; W=17; % Parameters
+v_repeated_line = miura_repeated_line_tracking(img,fvr,max_iterations,r,W, jointMask);
+
+% Binarise the vein image
+md = median(v_repeated_line(v_repeated_line>0));
+v_repeated_line_bin = v_repeated_line > md; 
+
+figure(5); clf;
+    CreateAxes(2,1,1);
+    imshow(v_repeated_line, []);
 
     CreateAxes(2,1,2);
-    imshow(v_max_curvature_bin, []);
+    imshow(v_repeated_line_bin, []);
+    
     
 %% Make the structure more into my liking
 
-v_close = imdilate(v_max_curvature_bin, strel('disk',1));
+v_close = imopen(v_repeated_line_bin, strel('disk',1));
+
 v_skel  = bwmorph(v_close, 'skel', inf);
 % 
-% for j = floor(linspace(1,size(v_close,2),9))
-%     v_close(:,j) = 1;
-%     v_skel(:,j) = 1;
-% end
+for j = floor(linspace(1+20,size(v_close,2)-20,9))
+    v_close(:,j) = 1;
+    v_skel(:,j) = 1;
+end
 
-figure(3); clf;
+figure(6); clf;
     CreateAxes(2,1,1);
     imshow(v_close, []);
 
     CreateAxes(2,1,2);
     imshow(v_skel, []);
 
-    
+CC = bwconncomp(v_close);
+CC2 = bwconncomp(v_skel);
+
 %% Try watershed
 
 v_ws = watershed(v_close, 4);
@@ -67,36 +108,6 @@ figure(4); clf;
     CreateAxes(2,1,2);
     imshow(v_ws2, []);
 
-    
-%% Extract veins using repeated line tracking method
-max_iterations = 3000; r=1; W=17; % Parameters
-v_repeated_line = miura_repeated_line_tracking(img,fvr,max_iterations,r,W);
-
-% Binarise the vein image
-md = median(v_repeated_line(v_repeated_line>0));
-v_repeated_line_bin = v_repeated_line > md; 
-
-
-%% Make the structure more into my liking
-
-v_close = imopen(v_repeated_line_bin, strel('disk',1));
-
-v_skel  = bwmorph(v_close, 'skel', inf);
-% 
-for j = floor(linspace(1+20,size(v_close,2)-20,2))
-    v_close(:,j) = 1;
-    v_skel(:,j) = 1;
-end
-
-figure(5); clf;
-    CreateAxes(2,1,1);
-    imshow(v_close, []);
-
-    CreateAxes(2,1,2);
-    imshow(v_skel, []);
-
-CC = bwconncomp(v_close);
-CC2 = bwconncomp(v_skel);
 
 %% Match
 cw = 80; ch=30;

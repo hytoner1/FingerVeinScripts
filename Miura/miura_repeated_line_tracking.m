@@ -1,4 +1,4 @@
-function veins = miura_repeated_line_tracking(img, fvr, iterations, r, W)
+function veins = miura_repeated_line_tracking(img, fvr, iterations, r, W, jointMask)
 % Repeated line tracking
 
 % Parameters:
@@ -43,8 +43,12 @@ fvr(end-(r+hW-1):end,:) = 0;
 fvr(:,1:r+hW) = 0;
 fvr(:,end-(r+hW-1):end) = 0;
 
+if nargin < 6;
+    jointMask = ones(size(fvr));
+end
+
 %% Uniformly distributed starting points
-indices = find(fvr > 0);
+indices = find(fvr > 0 & jointMask > 0);
 a = randperm(length(indices));
 a = a(1:iterations); % Limit to number of iterations
 [ys, xs] = ind2sub(size(img), indices(a));
