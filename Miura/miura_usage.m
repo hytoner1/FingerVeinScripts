@@ -60,14 +60,15 @@ j_max_curvature_bin = j_max_curvature > md_j;
     
 
 %% Extract veins using repeated line tracking method
-max_iterations = 3000; r=1; W=17; % Parameters
+max_iterations = 3000; r=10; W=17; % Parameters
 v_repeated_line = miura_repeated_line_tracking(img,fvr,max_iterations,r,W, jointMask);
 
 % Binarise the vein image
 md = median(v_repeated_line(v_repeated_line>0));
 v_repeated_line_bin = v_repeated_line > md; 
 
-figure(5); clf;
+% figure(5); clf;
+figure;
     CreateAxes(2,1,1);
     imshow(v_repeated_line, []);
 
