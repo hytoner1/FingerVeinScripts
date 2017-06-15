@@ -1,4 +1,13 @@
-function G = realGabor(sigma, beta, f, theta, N)
+function G = realGabor(theta)
+
+sigma = 3;
+beta = sigma;
+% f = sqrt(2*log(2)) ./ (2*pi*sigma);
+f = 10;
+N = 32;
+
+% I_phase = G;
+% I_filt = G;
 
     [x,y] = meshgrid(-N:N, -N:N);
 % 

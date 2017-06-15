@@ -2,6 +2,8 @@
   % Once a part of project is completed, it can be admitted here 
  
 clear variables; close all;
+addpath(genpath('.'));
+
 
 %% file handling - function usage
 datapath = [pwd '\images']; % specify directory containing the folders with images
@@ -11,56 +13,56 @@ image0 = get_image(immap, 'participant', '0001', 'finger', 'right_ring',...
 % the above is equivalent to:
 % image0 = get_image(immap, 'participant', '0001', 'finger', 6, 'measurement', 2);
 
-addpath(genpath('.'));
 
 show_image(image0);
 finger = name_finger(image0)
 filename = image0.meta.im_fname
 
+%% Fast preprocessing
+
+% I = imresize(image0,0.5);               % Downscale image
+I = double(I);
+[fvr, fve] = lee_region(I,4,40);    % Get finger region
+
+figure(2); clf
+    CreateAxes(2,1,1)
+    imshow(fvr,[]);
+%     
+% jointMask = jointFinder(I, fvr);
+% img_jMasked= I .* jointMask;
+% 
+% figure(2);
+%     CreateAxes(2,1,2);
+%     imshow( img_jMasked, [] );
+
+I_region = I .* fvr;
 %% Gabor stuff
 
 k = 1:8;
 % theta = k.*pi/8;
 theta = linspace(0, pi, 8);
-
-sigma = 3;
-beta = sigma;
-% f = sqrt(2*log(2)) ./ (2*pi*sigma);
-f = 10;
-N = 32;
-
 G = cell(size(k));
-I_phase = G;
-I_filt = G;
 
-for i = 1:length(k);
-	G{i}  = realGabor(sigma, beta, f, theta(i), N);
-    I_filt{i} = imfilter(I, G{i});
-%     [I_filt{i}, I_phase{i}] = imgaborfilt(I, G{i});
-
-end
-
-
-% figure(5); clf; imshow(G, [])
-
-%% 
-
-% I_filt = imfilter(I, G, 'conv');
     figure(6); clf
 
-for j=1:length(k)
-    CreateAxes(4,2,j)
-        imshow((I_filt{j}), [])
-
-        title(j)
+for i = 1:length(k);
+	G{i}  = realGabor(theta(i));
+    I_filt{i} = imfilter(I_region, G{i});
+    I_filt{i} = I_filt{i} .* imerode(fvr, strel('disk',15));
+%     [I_filt{i}, I_phase{i}] = imgaborfilt(I, G{i});
+    
+    CreateAxes(4,2,i);
+        imshow((I_filt{i}), []);
+        title(i);
 end
 
-%%
 
-I_sum = I_filt{4}./2 + I_filt{3}./2;
+
+I_sum = sumOverI(I_filt, 1:8);
+
 
 figure(7); clf;
-    imshow(I_sum)
+    imshow(I_sum,[])
 
     
     

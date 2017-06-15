@@ -43,7 +43,7 @@ IfiltZeros = Ifilt(zeroInd);
 [~, ordered] = sort(IfiltZeros , 'descend' );
 jLoc = sort( [zeroInd(ordered(1)), zeroInd(ordered(2))] );
 
-% figure; plot(Ifilt); hold on; plot(zeroInd, Ifilt(zeroInd),'x')
+figure; plot(Ifilt); hold on; plot(zeroInd, Ifilt(zeroInd),'x')
 
 
 %% Find local minimima 
@@ -52,7 +52,7 @@ med = median( Ifilt(jLoc(1):jLoc(2)) );
 
 IfiltT = Ifilt .* (Ifilt >= med);
 
-% figure; plot(IfiltT);
+figure; plot(IfiltT);
 
 e1 = [nan, nan];
 e2 = [nan, nan];
@@ -81,7 +81,7 @@ end
 jointMask = fingerMask;
 jointMask(:, [1:e1(1), e1(2):e2(1), e2(2):end] ) = 0;
 
-% figure; imshow(jointMask,[])
+figure; imshow(jointMask,[])
 
 
 end
