@@ -24,14 +24,14 @@ im_enhanced = im_enhance(im);
 figure(); imshow(im_enhanced, []); title('Kumar-Zhou enhancement');
 
 %% Fast preprocessing
-I = im_enhanced;
+% I = im_enhanced;
 % I = imresize(image0,0.5);               % Downscale image
-I = double(I);
-[fvr, fve] = lee_region(I,4,40);    % Get finger region
+% I = double(I);
+% [fvr, fve] = lee_region(I,4,40);    % Get finger region
 
-figure(2); clf
-    CreateAxes(2,1,1)
-    imshow(fvr,[]);
+% figure(2); clf
+%     CreateAxes(2,1,1)
+%     imshow(fvr,[]);
 %     
 % jointMask = jointFinder(I, fvr);
 % img_jMasked= I .* jointMask;
@@ -40,9 +40,10 @@ figure(2); clf
 %     CreateAxes(2,1,2);
 %     imshow( img_jMasked, [] );
 
-I_region = I .* fvr;
+% I_region = I .* fvr;
 %% Gabor stuff
 I = im_enhanced;
+% I(isnan(I)) = 0;
 
 k = 1:8;
 % theta = k.*pi/8;
@@ -53,8 +54,8 @@ G = cell(size(k));
 
 for i = 1:length(k);
 	G{i}  = realGabor(theta(i));
-    I_filt{i} = imfilter(I_region, G{i});
-    I_filt{i} = I_filt{i} .* imerode(fvr, strel('disk',15));
+    I_filt{i} = imfilter(I, G{i});
+%     I_filt{i} = I_filt{i} .* imerode(fvr, strel('disk',15));
 %     [I_filt{i}, I_phase{i}] = imgaborfilt(I, G{i});
     
     CreateAxes(4,2,i);
@@ -64,7 +65,7 @@ end
 
 
 
-I_sum = sumOverI(I_filt, 1:8);
+I_sum = sumOverI(I_filt, 1:3);
 
 
 figure(7); clf;
