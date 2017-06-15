@@ -11,6 +11,8 @@ image0 = get_image(immap, 'participant', '0001', 'finger', 'right_ring',...
 % the above is equivalent to:
 % image0 = get_image(immap, 'participant', '0001', 'finger', 6, 'measurement', 2);
 
+addpath(genpath('.'));
+
 show_image(image0);
 finger = name_finger(image0)
 filename = image0.meta.im_fname

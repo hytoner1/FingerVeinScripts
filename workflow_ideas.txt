@@ -1,0 +1,16 @@
+# Roni's ideas for the workflow of the Finger Vein Recognition task
+
++ Initialization and Preprocessing
+  - Acquire image data IMG
+  - Denoise 
+    * Median filter
+  - Localize
+    * Finger itself
+    * Joints
+  - Enhance veins
+    * State of the art
+    * Gradient method
+
++ Segment veins
+  - Miura'esque
+  - Region growing?
