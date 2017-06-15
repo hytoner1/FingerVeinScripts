@@ -8,8 +8,6 @@ Human Identification Using Finger Images'.
 Includes finger boundary detection and NaN mask computation (could be moved
 out of the function, or the mask returned as additional output parameter,
 if necessary).
-
-Computes for ages. Local histogram equalisation to be blamed.
 %}
 
 [height, width] = size(im);
@@ -60,17 +58,7 @@ im_subtracted = im_nan - 0.7*back_interp; % subtract scaled background image fro
 immean = mean(im_subtracted(~isnan(im_subtracted))); %mean value of the finger region after background subtraction
 im2 = im_subtracted;
 im2(isnan(im_subtracted)) = immean; %set outside of the finger to the mean (for local histogram equalisation)
-im_ad_local = localhist(im2, 80, 0.9) .* nanmask; % local histogram equalisation, see function below
+im_ad_local = adapthisteq(im2, 'NumTiles', [32,16], 'ClipLimit', 0.04) .* nanmask; % local histogram equalisation
 
 im_enhanced = im2double(im_ad_local); %output
-end
-
-function im_adapted = localhist(im_in, w, k)
-    % w: the Neighborhood or Window size
-    % k: the value of the constant k (value should be between 0 and 1)
-    M=mean2(im_in);
-    z=colfilt(im_in,[w w],'sliding',@std);
-    m=colfilt(im_in,[w w],'sliding',@mean);
-    A=k*M./z;
-    im_adapted=A.*(im_in-m)+m;
 end
