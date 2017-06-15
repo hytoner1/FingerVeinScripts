@@ -15,11 +15,16 @@ image0 = get_image(immap, 'participant', '0001', 'finger', 'right_ring',...
 
 
 show_image(image0);
-finger = name_finger(image0)
-filename = image0.meta.im_fname
+% finger = name_finger(image0)
+% filename = image0.meta.im_fname
+
+%% enhancement
+im = image0.image;
+im_enhanced = im_enhance(im);
+figure(); imshow(im_enhanced, []); title('Kumar-Zhou enhancement');
 
 %% Fast preprocessing
-
+I = im_enhanced;
 % I = imresize(image0,0.5);               % Downscale image
 I = double(I);
 [fvr, fve] = lee_region(I,4,40);    % Get finger region
@@ -37,6 +42,7 @@ figure(2); clf
 
 I_region = I .* fvr;
 %% Gabor stuff
+I = im_enhanced;
 
 k = 1:8;
 % theta = k.*pi/8;
