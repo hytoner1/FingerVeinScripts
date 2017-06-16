@@ -1,6 +1,6 @@
 function G = realGabor(theta)
 
-sigma = 3;
+sigma = 2;
 beta = sigma;
 % f = sqrt(2*log(2)) ./ (2*pi*sigma);
 f = 10;

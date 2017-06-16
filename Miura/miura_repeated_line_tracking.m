@@ -22,6 +22,10 @@ function veins = miura_repeated_line_tracking(img, fvr, iterations, r, W, jointM
 % Date:    20th December 2011
 % License: Simplified BSD License
 
+if isempty(fvr)
+    fvr = ones(size(img));
+end
+
 p_lr = 0.5;  % Probability of goin left or right
 p_ud = 0.25; % Probability of going up or down
 % writerObj = VideoWriter('peaks.avi');

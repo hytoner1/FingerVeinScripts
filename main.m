@@ -28,26 +28,26 @@ figure(); imshow(im_enhanced, []); title('Kumar-Zhou enhancement');
 % I = imresize(image0,0.5);               % Downscale image
 % I = double(I);
 % [fvr, fve] = lee_region(I,4,40);    % Get finger region
-
+% 
 % figure(2); clf
 %     CreateAxes(2,1,1)
 %     imshow(fvr,[]);
 %     
-% jointMask = jointFinder(I, fvr);
-% img_jMasked= I .* jointMask;
+jointMask = jointFinder(im, ~isnan(im_enhanced));
+img_jMasked= im .* jointMask;
 % 
-% figure(2);
+figure(2);
 %     CreateAxes(2,1,2);
-%     imshow( img_jMasked, [] );
+    imshow( img_jMasked, [] );
 
 % I_region = I .* fvr;
 %% Gabor stuff
 I = im_enhanced;
 % I(isnan(I)) = 0;
 
-k = 1:8;
+k = 1:4;
 % theta = k.*pi/8;
-theta = linspace(0, pi, 8);
+theta = linspace(0, pi/2, 4);
 G = cell(size(k));
 
     figure(6); clf
@@ -58,19 +58,28 @@ for i = 1:length(k);
 %     I_filt{i} = I_filt{i} .* imerode(fvr, strel('disk',15));
 %     [I_filt{i}, I_phase{i}] = imgaborfilt(I, G{i});
     
-    CreateAxes(4,2,i);
+    CreateAxes(2,2,i);
         imshow((I_filt{i}), []);
         title(i);
 end
 
-
-
-I_sum = sumOverI(I_filt, 1:3);
-
+I_sum = sumOverI(I_filt, 1:4);
 
 figure(7); clf;
     imshow(I_sum,[])
 
     
-    
-    
+    %% Miura stuff
+max_iterations = 3000; r=10; W=17; % Parameters
+v_repeated_line = miura_repeated_line_tracking(I_sum,[],max_iterations,r,W, jointMask);
+
+md = median(v_repeated_line(v_repeated_line>0));
+v_repeated_line_bin = v_repeated_line > md; 
+
+% figure(5); clf;
+figure;
+    CreateAxes(2,1,1);
+    imshow(v_repeated_line, []);
+
+    CreateAxes(2,1,2);
+    imshow(v_repeated_line_bin, []);

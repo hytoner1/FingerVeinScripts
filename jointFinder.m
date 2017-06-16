@@ -20,8 +20,9 @@ img_m = img .* fingerMask;
 I = sum( img_m ) ./ sum(img_m ~= 0) ;
 
     % Mean filter to get rid of some saddle points
-n = 7;
-Ifilt = conv(I, ones(n,1)./n);
+n = 10;
+% Ifilt = conv(I, ones(n,1)./n);
+Ifilt = filtfilt(ones(n,1)./n, 1, I);
 
     % Differentiate to get the derivative zeros
 IfiltD = diff(Ifilt(1:end));
@@ -41,11 +42,21 @@ zeroInd = zeroInd( zeroInd > edgeT & zeroInd < size(Ifilt,2)-edgeT);
 IfiltZeros = Ifilt(zeroInd);
 
 [~, ordered] = sort(IfiltZeros , 'descend' );
-jLoc = sort( [zeroInd(ordered(1)), zeroInd(ordered(2))] );
+% jLoc = sort( [zeroInd(ordered(1)), zeroInd(ordered(2))] );
 
 figure; plot(Ifilt); hold on; plot(zeroInd, Ifilt(zeroInd),'x')
 
 
+%% Find global maxima
+
+    % The highest value pretty certainly is one of the joints
+jLoc(1) = zeroInd(ordered(1));
+    
+    % Disregard everything too close to this value
+ordered( abs(zeroInd(ordered) - jLoc(1)) < size(Ifilt,2)/3 ) = [];
+
+    % Now the second joint should be at about the new highest value
+jLoc(2) = zeroInd(ordered(1));
 %% Find local minimima 
 
 med = median( Ifilt(jLoc(1):jLoc(2)) );
@@ -57,23 +68,39 @@ figure; plot(IfiltT);
 e1 = [nan, nan];
 e2 = [nan, nan];
 
-for i = 1:50;
-    if IfiltT(jLoc(1) - i) == 0 && isnan(e1(1));
-        e1(1) = jLoc(1) - (i-1);
+for i = 1:size(img,2)/3
+    if isnan(e1(1)) && (jLoc(1)-i == 1 || IfiltT(jLoc(1)-i) == 0 || IfiltT(jLoc(1)-i) > IfiltT(jLoc(1)))
+        e1(1) = jLoc(1)-i;
     end
-    if IfiltT(jLoc(1) + i) == 0 && isnan(e1(2));
-        e1(2) = jLoc(1) + (i-1);
+    if isnan(e1(2)) && (IfiltT(jLoc(1)+i) == 0 || IfiltT(jLoc(1)+i) > IfiltT(jLoc(1)))
+        e1(2) = jLoc(1)+i;
     end
-    if IfiltT(jLoc(2) - i) == 0 && isnan(e2(1));
-        e2(1) = jLoc(2) - (i-1);
+    
+    if isnan(e2(1)) && (IfiltT(jLoc(2)-i) == 0 || IfiltT(jLoc(2)-i) > IfiltT(jLoc(2)))
+        e2(1) = jLoc(2)-i;
     end
-    if IfiltT(jLoc(2) + i) == 0 && isnan(e2(2));
-        e2(2) = jLoc(2) + (i-1);
-    end
-    if sum([isnan(e1), isnan(e2)]) == 0
-        break;
+    if isnan(e2(2)) && (IfiltT(jLoc(2)+i) == size(img,2) || IfiltT(jLoc(2)+i) > IfiltT(jLoc(2)))
+        e2(2) = jLoc(2)+i;
     end
 end
+% 
+% for i = 1:50;
+%     if IfiltT(jLoc(1) - i) == 0 && isnan(e1(1));
+%         e1(1) = jLoc(1) - (i-1);
+%     end
+%     if IfiltT(jLoc(1) + i) == 0 && isnan(e1(2));
+%         e1(2) = jLoc(1) + (i-1);
+%     end
+%     if IfiltT(jLoc(2) - i) == 0 && isnan(e2(1));
+%         e2(1) = jLoc(2) - (i-1);
+%     end
+%     if IfiltT(jLoc(2) + i) == 0 && isnan(e2(2));
+%         e2(2) = jLoc(2) + (i-1);
+%     end
+%     if sum([isnan(e1), isnan(e2)]) == 0
+%         break;
+%     end
+% end
     
 
 %%
