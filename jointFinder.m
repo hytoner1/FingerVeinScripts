@@ -1,4 +1,4 @@
-function jointMask = jointFinder(img, fingerMask)
+function jointmask = jointFinder(img, fingerMask)
 %% function jointMask = jointFinder(img, fingerMask)
 %   Searches for the location of joints in finger image img
 % INPUT:
@@ -7,8 +7,12 @@ function jointMask = jointFinder(img, fingerMask)
 % Output:
 %   jointMask: binary mask showing the location of two joints [left, right]
 
-if nargin == 1;
+if nargin == 1
     fingerMask = ones(size( img ));
+end
+img_data = whos('img');
+if strcmp(img_data.class, 'uint8')
+    img = im2double(img);
 end
 
 %% Mask the finger image
@@ -20,51 +24,52 @@ img_m = img .* fingerMask;
 I = sum( img_m ) ./ sum(img_m ~= 0) ;
 
     % Mean filter to get rid of some saddle points
-n = 10;
-% Ifilt = conv(I, ones(n,1)./n);
+n = 10; % Width of the mean filter
 Ifilt = filtfilt(ones(n,1)./n, 1, I);
 
     % Differentiate to get the derivative zeros
 IfiltD = diff(Ifilt(1:end));
 IfiltD2= zeros(size(IfiltD)) .* nan;
 
-    % Find zero crossings as a product
-for i = 2:length(IfiltD);
+    % Find zero crossings as a*b <= 0 -> Crossing between a and b
+for i = 2:length(IfiltD)
     IfiltD2(i) = IfiltD(i) * IfiltD(i-1);
 end
+[~, zeroInd] = find(IfiltD2 <= 0);
 
-    % Find the two maxima not too close to the edges
-[~, zeroInd] = find(IfiltD2 < 0);
-
+    % Ignore crossings too close to the edges of image (10% threshold)
 edgeT = size(img,2) / 10;
 zeroInd = zeroInd( zeroInd > edgeT & zeroInd < size(Ifilt,2)-edgeT);
 
-IfiltZeros = Ifilt(zeroInd);
-
+IfiltZeros = Ifilt(zeroInd);    % Intensity values at zero crossings
+    % Order the intensity values to descend
 [~, ordered] = sort(IfiltZeros , 'descend' );
-% jLoc = sort( [zeroInd(ordered(1)), zeroInd(ordered(2))] );
 
+    % Plot intensity and zero crossings
 figure; plot(Ifilt); hold on; plot(zeroInd, Ifilt(zeroInd),'x')
 
 
-%% Find global maxima
+%% Find most probable joint locations
 
-    % The highest value pretty certainly is one of the joints
+    % The highest is value pretty certainly one of the joints
 jLoc(1) = zeroInd(ordered(1));
     
-    % Disregard everything too close to this value
+    % Disregard everything too close to this point (30% threshold)
 ordered( abs(zeroInd(ordered) - jLoc(1)) < size(Ifilt,2)/3 ) = [];
 
     % Now the second joint should be at about the new highest value
 jLoc(2) = zeroInd(ordered(1));
-%% Find local minimima 
+%% Find joint widths
 
+    % Median value between joint locations
 med = median( Ifilt(jLoc(1):jLoc(2)) );
-
+    % Everything below median can't be joint
 IfiltT = Ifilt .* (Ifilt >= med);
 
 figure; plot(IfiltT);
 
+    % Search for the edges of the joints as area that is above the
+    % threshold, but not above the value at joint location
 e1 = [nan, nan];
 e2 = [nan, nan];
 
@@ -83,32 +88,14 @@ for i = 1:size(img,2)/3
         e2(2) = jLoc(2)+i;
     end
 end
-% 
-% for i = 1:50;
-%     if IfiltT(jLoc(1) - i) == 0 && isnan(e1(1));
-%         e1(1) = jLoc(1) - (i-1);
-%     end
-%     if IfiltT(jLoc(1) + i) == 0 && isnan(e1(2));
-%         e1(2) = jLoc(1) + (i-1);
-%     end
-%     if IfiltT(jLoc(2) - i) == 0 && isnan(e2(1));
-%         e2(1) = jLoc(2) - (i-1);
-%     end
-%     if IfiltT(jLoc(2) + i) == 0 && isnan(e2(2));
-%         e2(2) = jLoc(2) + (i-1);
-%     end
-%     if sum([isnan(e1), isnan(e2)]) == 0
-%         break;
-%     end
-% end
     
 
-%%
+%% Create jointmask from the edges
 
-jointMask = fingerMask;
-jointMask(:, [1:e1(1), e1(2):e2(1), e2(2):end] ) = 0;
+jointmask = fingerMask;
+jointmask(:, [1:e1(1), e1(2):e2(1), e2(2):end] ) = 0;
 
-figure; imshow(jointMask,[])
+figure; imshow(jointmask,[])
 
 
 end

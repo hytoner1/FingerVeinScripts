@@ -18,37 +18,32 @@ show_image(image0);
 % finger = name_finger(image0)
 % filename = image0.meta.im_fname
 
-%% enhancement
+%% Enhancement
 im = image0.image;
-im_enhanced = im_enhance(im);
-figure(); imshow(im_enhanced, []); title('Kumar-Zhou enhancement');
+[im_enhanced, fingermask] = im_enhance(im2double(im));
+fingermask_zeros = ~isnan(fingermask);
 
-%% Fast preprocessing
-% I = im_enhanced;
-% I = imresize(image0,0.5);               % Downscale image
-% I = double(I);
-% [fvr, fve] = lee_region(I,4,40);    % Get finger region
-% 
-% figure(2); clf
-%     CreateAxes(2,1,1)
-%     imshow(fvr,[]);
-%     
+figure(); 
+    imshow(im_enhanced, []); 
+    title('Kumar-Zhou enhancement');
+    set(gca, 'FontSize' ,16)
+
+%% Create masks for joint regions    
 jointMask = jointFinder(im, ~isnan(im_enhanced));
-img_jMasked= im .* jointMask;
-% 
+img_jMasked= im2double(im) .* jointMask;
+ 
 figure(2);
-%     CreateAxes(2,1,2);
     imshow( img_jMasked, [] );
 
-% I_region = I .* fvr;
 %% Gabor stuff
 I = im_enhanced;
 % I(isnan(I)) = 0;
 
-k = 1:4;
+k = 1:8;
 % theta = k.*pi/8;
-theta = linspace(0, pi/2, 4);
+theta = linspace(0, pi/2, length(k));
 G = cell(size(k));
+I_filt = G;
 
     figure(6); clf
 
@@ -58,20 +53,25 @@ for i = 1:length(k);
 %     I_filt{i} = I_filt{i} .* imerode(fvr, strel('disk',15));
 %     [I_filt{i}, I_phase{i}] = imgaborfilt(I, G{i});
     
-    CreateAxes(2,2,i);
+    CreateAxes(length(k)/2,2,i, 0.1);
         imshow((I_filt{i}), []);
-        title(i);
+        title(['Angle = ', num2str(theta(i)*180/pi), ' deg']);
 end
 
-I_sum = sumOverI(I_filt, 1:4);
+TBSummed = 1:length(k)/2; % To Be Summed below 
+I_sum = sumOverI(I_filt, TBSummed);
 
 figure(7); clf;
     imshow(I_sum,[])
-
+    title(['Sum of Gabors ', mat2str(TBSummed)])
+    set(gca, 'FontSize' ,16)
+    
     
     %% Miura stuff
 max_iterations = 3000; r=10; W=17; % Parameters
-v_repeated_line = miura_repeated_line_tracking(I_sum,[],max_iterations,r,W, jointMask);
+% v_repeated_line = miura_repeated_line_tracking(I_sum,[],max_iterations,r,W, jointMask);
+v_repeated_line = miura_repeated_line_tracking(I_sum,fingermask_zeros,...
+    max_iterations,r,W, jointMask);
 
 md = median(v_repeated_line(v_repeated_line>0));
 v_repeated_line_bin = v_repeated_line > md; 

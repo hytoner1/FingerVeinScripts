@@ -26,6 +26,7 @@ if isempty(fvr)
     fvr = ones(size(img));
 end
 
+
 p_lr = 0.5;  % Probability of goin left or right
 p_ud = 0.25; % Probability of going up or down
 % writerObj = VideoWriter('peaks.avi');
@@ -47,7 +48,7 @@ fvr(end-(r+hW-1):end,:) = 0;
 fvr(:,1:r+hW) = 0;
 fvr(:,end-(r+hW-1):end) = 0;
 
-if nargin < 6;
+if nargin < 6 || isempty(jointMask)
     jointMask = ones(size(fvr));
 end
 
