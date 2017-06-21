@@ -16,6 +16,7 @@ if necessary).
 h = fspecial('log', 20, 2);
 im_filt = imfilter(im, h, 'replicate');
 im_filt = edge(im_filt, 'Canny', [0.01, 0.75], 0.5);
+im_filt(:,1) = im_filt(:,2); im_filt(:,end) = im_filt(:,end-1); %to correct the masking
 
 % NaN mask for the regions outside the finger
 h2 = ceil(height/2);    
@@ -58,7 +59,7 @@ im_subtracted = im_nan - 0.7*back_interp; % subtract scaled background image fro
 immean = mean(im_subtracted(~isnan(im_subtracted))); %mean value of the finger region after background subtraction
 im2 = im_subtracted;
 im2(isnan(im_subtracted)) = immean; %set outside of the finger to the mean (for local histogram equalisation)
-im_ad_local = adapthisteq(im2, 'NumTiles', [32,16], 'ClipLimit', 0.04) .* nanmask; % local histogram equalisation
+im_ad_local = adapthisteq(im2, 'NumTiles', [16, 32], 'ClipLimit', 0.04) .* nanmask; % local histogram equalisation; 16 rows, 32 cols
 
 im_enhanced = im2double(im_ad_local); %output
 end
