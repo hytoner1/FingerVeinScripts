@@ -32,7 +32,7 @@ classdef image_metadata
             if iscell(full_fname)
                 full_fname = char(full_fname);
             end
-            slashes = strfind(full_fname,'\');
+            slashes = strfind(full_fname,'/');
             im_fname = full_fname((slashes(end)+1):end);
             
             obj.full_fname = full_fname;

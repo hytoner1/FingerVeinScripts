@@ -45,7 +45,7 @@ classdef metadata_array
             
             for idx = 1:numel(datafolders) %for each subfolder = participant
                 p = char(datafolders(idx)); %p: folder name = participant id
-                images_p = imageDatastore(fullfile(['images\' p])); % all images from p
+                images_p = imageDatastore(fullfile(['images/' p])); % all images from p
                 p_cell = cell(6,4); % cell array for given participant: 6 fingers, 4 measurements
                 for im_idx =1:numel(images_p.Files)
                     im_meta = image_metadata(images_p.Files(im_idx));

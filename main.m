@@ -6,7 +6,7 @@ addpath(genpath('.'));
 
 
 %% file handling - function usage
-datapath = [pwd '\images']; % specify directory containing the folders with images
+datapath = [pwd '/images']; % specify directory containing the folders with images
 immap = metadata_array(datapath); % create metadata_array object
 image0 = get_image(immap, 'participant', '0001', 'finger', 'right_ring',...
     'measurement', 2); % create image_container object - image+metadata
