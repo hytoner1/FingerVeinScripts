@@ -10,8 +10,8 @@ datapath = [pwd '/images']; % specify directory containing the folders with imag
 immap = metadata_array(datapath); % create metadata_array object
 image0 = get_image(immap, 'participant', '0001', 'finger', 'right_ring',...
     'measurement', 2); % create image_container object - image+metadata
-% the above is equivalent to:
-% image0 = get_image(immap, 'participant', '0001', 'finger', 6, 'measurement', 2);
+% The above is equivalent to:
+%   image0 = get_image(immap, 'participant', '0001', 'finger', 6, 'measurement', 2);
 
 
 show_image(image0);
@@ -19,19 +19,21 @@ show_image(image0);
 % filename = image0.meta.im_fname
 
 %% Enhancement
-im = image0.image;
-[im_enhanced, fingermask] = im_enhance(im2double(im));
-fingermask_zeros = ~isnan(fingermask);
+im = image0.image;  % Read the image
+[im_enhanced, fingermask] = im_enhance(im2double(im));  % Enhance it
+fingermask_zeros = ~isnan(fingermask);	% Create a version where NaN -> 0
 
+    % Show enhanced image
 figure(); 
     imshow(im_enhanced, []); 
     title('Kumar-Zhou enhancement');
     set(gca, 'FontSize' ,16)
 
 %% Create masks for joint regions    
-jointMask = jointFinder(im, ~isnan(im_enhanced));
-img_jMasked= im2double(im) .* jointMask;
+jointMask = jointFinder(im, ~isnan(im_enhanced));   % Find the mask for joint regions
+img_jMasked= im2double(im) .* jointMask;            % Apply it for the orig image
  
+    % Show the masked orig image
 figure(2);
     imshow( img_jMasked, [] );
 
@@ -39,25 +41,27 @@ figure(2);
 I = im_enhanced;    % Copy the enhanced file
 I(isnan(I)) = 0;    % Convert NaNs to zeros for filtering to work
 
-k = 1:8;
-theta = linspace(0, pi/2, length(k));
-G = cell(size(k));
-I_filt = G;
+k = 8;              % The number of gabor filters to be applied
+theta = linspace(0, pi/2, k);   % Corresponding angles
+G = cell(1, k);     % Store filters here
+I_filt = G;         % Store filtered images here
+
 
     figure(6); clf
-
-for i = 1:length(k)
-	G{i}  = realGabor(theta(i));
-    I_filt{i} = imfilter(I, G{i});
+for i = 1:k
+	G{i}  = realGabor(theta(i));    % Create Gabor filter for angle theta
+    I_filt{i} = imfilter(I, G{i});  % Apply the filter
     
-    CreateAxes(length(k)/2,2,i, 0.1);
+        % Show the filtered images
+    CreateAxes(2,k/2,i, 0.1);  
         imshow(I_filt{i}, []);
         title(['Angle = ', num2str(theta(i)*180/pi), ' deg']);
 end
 
-TBSummed = 1:length(k)/2; % To Be Summed below 
-I_sum = sumOverI(I_filt, TBSummed);
+TBSummed = 1:k/2; % Filtered images To Be Summed below 
+I_sum = sumOverI(I_filt, TBSummed); % (Weighted) sum of said images
 
+    % Show the sum
 figure(7); clf;
     imshow(I_sum,[])
     title(['Sum of Gabors ', mat2str(TBSummed)])
