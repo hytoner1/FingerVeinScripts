@@ -1,7 +1,7 @@
 %% This is a script called by main.m, that does the whole miura line of processing
     % (With Roni-esque twists)
 
-max_iterations = 10000; r=10; W=17; % Parameters
+max_iterations = 2000; r=10; W=17; % Parameters
 % v_repeated_line = miura_repeated_line_tracking(I_sum,[],max_iterations,r,W, jointMask);
 v_repeated_line = miura_repeated_line_tracking(I_sum,fingermask_zeros,...
    max_iterations,r,W, jointMask);

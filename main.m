@@ -70,7 +70,7 @@ figure(7); clf;
     
     %% Miura stuff
 
-miura_like_stuff
+miura_like_stuff;
 
 %%
 skel= bwmorph(v_rep_prcss3,'skel',Inf); %scheletonized image
