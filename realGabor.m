@@ -1,10 +1,12 @@
 function G = realGabor(theta)
-
+ %% function G = realGabor(theta) returns real valued part Gabor filter G for angle theta
+ 
+    % Parameters defining the shape and size of the filter
 sigma = 2;
 beta = sigma;
-% f = sqrt(2*log(2)) ./ (2*pi*sigma);
-f = 10;
-N = 32;
+f = 20;
+    % Size ofthe filter/2
+N = 16;
 
     [x,y] = meshgrid(-N:N, -N:N);
 
