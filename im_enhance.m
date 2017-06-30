@@ -1,37 +1,39 @@
-function [im_enhanced, nanmask] = im_enhance(im)
+function [im_enhanced, nanmask] = im_enhance(im, nanmask)
 
 %{
 Enhance image basing on the Kumar Zhou paper:
 'An accurate finger vein based verification system.
 Human Identification Using Finger Images'.
 
-Includes finger boundary detection and NaN mask computation (could be moved
-out of the function, or the mask returned as additional output parameter,
-if necessary).
+Includes finger boundary detection and NaN mask computation, unless the mask is 
+provided during the function call.
 %}
 
 [height, width] = size(im);
 
-% Laplacian of Gaussian filtering and Canny edge detection
-h = fspecial('log', 20, 2);
-im_filt = imfilter(im, h, 'replicate');
-im_filt = edge(im_filt, 'Canny', [0.01, 0.75], 0.5);
-im_filt(:,1) = im_filt(:,2); im_filt(:,end) = im_filt(:,end-1); %to correct the masking
-
-% NaN mask for the regions outside the finger
-h2 = ceil(height/2);    
-nanmask = ones(height, width);
-for colidx=1:width
-    col = im_filt(1:h2,colidx);
-    [~, idx] = max(col(:));
-    nanmask(1:idx, colidx) = NaN;
+%% Laplacian of Gaussian filtering and Canny edge detection
+if nargin==1
+  
+    h = fspecial('log', 20, 2);
+    im_filt = imfilter(im, h, 'replicate');
+    im_filt = edge(im_filt, 'Canny', [0.01, 0.75], 0.5);
+    im_filt(:,1) = im_filt(:,2); im_filt(:,end) = im_filt(:,end-1); %to correct the masking
     
-    col = im_filt(h2:end,colidx);
-    [~, idx] = max(col(:));
-    nanmask((h2+idx):end, colidx) = NaN;
+    %% NaN mask for the regions outside the finger
+    h2 = ceil(height/2);
+    nanmask = ones(height, width);
+    for colidx=1:width
+        col = im_filt(1:h2,colidx);
+        [~, idx] = max(col(:));
+        nanmask(1:idx, colidx) = NaN;
+        
+        col = im_filt(h2:end,colidx);
+        [~, idx] = max(col(:));
+        nanmask((h2+idx):end, colidx) = NaN;
+    end
+    
 end
-
-% Block average filtering
+%% Block average filtering
 step = 5; % number of pixels from start of one block to start of the other
 bs = 15; % half of block size
 im_nan = im .* nanmask; %original image masked with NaN outside the finger region
