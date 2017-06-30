@@ -72,7 +72,8 @@ v_repeated_line = miura_repeated_line_tracking(I_sum,fingermask_zeros,...
 v_curvature = miura_max_curvature(I_sum, fingermask_zeros, 3);
 
 md = median(v_repeated_line(v_repeated_line>0));
-v_repeated_line_bin = v_repeated_line > md; 
+v_repeated_line_bin = v_repeated_line > md;
+v_repeated_line_bin2 = v_repeated_line > 1.5*md;
 
 % figure(5); clf;
 figure;

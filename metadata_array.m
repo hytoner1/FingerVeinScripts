@@ -35,10 +35,11 @@ classdef metadata_array
             % Create metadata_array object from given directory (character
             % array).
             
-            % get list of subdirectories
+            % get list of subdirectoriesisub
+            
             directory = dir(datapath);
             isub = [directory(:).isdir];
-            datafolders = {directory(isub).name}';
+            datafolders = {directory(isub).name};
             datafolders(ismember(datafolders,{'.','..'})) = [];
             
             obj.images = containers.Map; % create Map Containers object
@@ -88,11 +89,12 @@ classdef metadata_array
             addOptional(p, 'measurement',1, @isnumeric);
             addOptional(p, 'full', false, @islogical)
             parse(p, obj, varargin{:});
+            Res = p.Results
             
-            if isnumeric(p.Results.finger)
-                finger = p.Results.finger;
-            elseif (ischar(p.Results.finger) | isstring(p.Results.finger))
-                finger = find(contains(obj.fingers, char(p.Results.finger)));
+            if isnumeric(Res.finger)
+                finger = Res.finger;
+            elseif (ischar(Res.finger) | isstring(Res.finger))
+                finger = find(contains(obj.fingers, char(Res.finger)));
                 if isempty(finger)
                     error('Invalid finger name; refer to fingers property for allowed names or use integer 1-6.');
                 end
@@ -100,11 +102,12 @@ classdef metadata_array
                 error('Invalid data type for finger argument');
             end
             
-            participant_data = obj.images(p.Results.participant); %get cell array for given participant
-            image_meta = participant_data(finger, p.Results.measurement); % access metadata object
+            keys(obj.images)
+            participant_data = obj.images(Res.participant); %get cell array for given participant
+            image_meta = participant_data(finger, Res.measurement); % access metadata object
                                                                    % for given finger and measurement
             % access the filename
-            if p.Results.full
+            if Res.full
                 im_fname = image_meta{1}.full_fname;
             else
                 im_fname = image_meta{1}.im_fname;
@@ -126,10 +129,11 @@ classdef metadata_array
             addOptional(p, 'finger',4);
             addOptional(p, 'measurement',1, @isnumeric);
             parse(p, obj, varargin{:});
+            Res = p.Results;
             
             % get filename
-            im_fname = get_fname(obj, 'participant', p.Results.participant,...
-                'finger', p.Results.finger, 'measurement', p.Results.measurement, 'full', true);
+            im_fname = get_fname(obj, 'participant', Res.participant,...
+                'finger', Res.finger, 'measurement', Res.measurement, 'full', true);
             image = image_container(im_fname); %read the image
         end
     end
