@@ -36,25 +36,22 @@ figure(2);
     imshow( img_jMasked, [] );
 
 %% Gabor stuff
-I = im_enhanced;
-% I(isnan(I)) = 0;
+I = im_enhanced;    % Copy the enhanced file
+I(isnan(I)) = 0;    % Convert NaNs to zeros for filtering to work
 
 k = 1:8;
-% theta = k.*pi/8;
 theta = linspace(0, pi/2, length(k));
 G = cell(size(k));
 I_filt = G;
 
     figure(6); clf
 
-for i = 1:length(k);
+for i = 1:length(k)
 	G{i}  = realGabor(theta(i));
     I_filt{i} = imfilter(I, G{i});
-%     I_filt{i} = I_filt{i} .* imerode(fvr, strel('disk',15));
-%     [I_filt{i}, I_phase{i}] = imgaborfilt(I, G{i});
     
     CreateAxes(length(k)/2,2,i, 0.1);
-        imshow((I_filt{i}), []);
+        imshow(I_filt{i}, []);
         title(['Angle = ', num2str(theta(i)*180/pi), ' deg']);
 end
 
@@ -71,7 +68,8 @@ figure(7); clf;
 max_iterations = 3000; r=10; W=17; % Parameters
 % v_repeated_line = miura_repeated_line_tracking(I_sum,[],max_iterations,r,W, jointMask);
 v_repeated_line = miura_repeated_line_tracking(I_sum,fingermask_zeros,...
-    max_iterations,r,W, jointMask);
+   max_iterations,r,W, jointMask);
+v_curvature = miura_max_curvature(I_sum, fingermask_zeros, 3);
 
 md = median(v_repeated_line(v_repeated_line>0));
 v_repeated_line_bin = v_repeated_line > md; 
@@ -82,4 +80,4 @@ figure;
     imshow(v_repeated_line, []);
 
     CreateAxes(2,1,2);
-    imshow(v_repeated_line_bin, []);
+    imshow(v_curvature, []);
