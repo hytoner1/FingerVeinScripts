@@ -122,3 +122,21 @@ figure;
     CreateAxes(2,1,2);
     imshow(v_rep_prcss3, []);
 
+%%
+skel= bwmorph(v_rep_prcss3,'skel',Inf); %scheletonized image
+figure, imshow(skel);
+B = bwmorph(skel, 'branchpoints');
+E = bwmorph(skel, 'endpoints');
+[y,x] = find(E);
+B_loc = find(B);
+Dmask = zeros(size(skel));
+% Start at a endpoint, start walking and find all pixels that are closer 
+% than the nearest branchpoint. Then remove those pixels.
+for k = 1:length(x)
+    D = bwdistgeodesic(skel,x(k),y(k));
+    distanceToBranchPt = min(D(B_loc));
+    Dmask(D < distanceToBranchPt) = true;
+end
+skelD = skel - Dmask;
+figure, imshow(skelD);
+
