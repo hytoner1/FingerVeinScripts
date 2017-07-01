@@ -1,4 +1,4 @@
-function jointmask = jointFinder(img, fingerMask)
+function jointmask = jointFinder(img, fingerMask, debugFlag)
 %% function jointMask = jointFinder(img, fingerMask)
 %   Searches for the location of joints in finger image img
 % INPUT:
@@ -13,6 +13,10 @@ end
 img_data = whos('img');
 if strcmp(img_data.class, 'uint8')
     img = im2double(img);
+end
+
+if nargin < 3
+    debugFlag = 0;
 end
 
 %% Mask the finger image
@@ -58,8 +62,9 @@ IfiltZeros = Ifilt(zeroInd);    % Intensity values at zero crossings
 [~, ordered] = sort(IfiltZeros , 'descend' );
 
     % Plot intensity and zero crossings
-figure; plot(Ifilt); hold on; plot(zeroInd, Ifilt(zeroInd),'x')
-
+if debugFlag
+    figure; plot(Ifilt); hold on; plot(zeroInd, Ifilt(zeroInd),'x')
+end
 
 %% Find most probable joint locations
 
@@ -78,7 +83,9 @@ med = median( Ifilt(jLoc(1):jLoc(2)) );
     % Everything below median can't be joint
 IfiltT = Ifilt .* (Ifilt >= med);
 
-figure; plot(IfiltT);
+if debugFlag
+    figure; plot(IfiltT);
+end
 
     % Search for the edges of the joints as area that is above the
     % threshold, but not above the value at joint location
@@ -107,7 +114,8 @@ end
 jointmask = fingerMask;
 jointmask(:, [1:e1(1), e1(2):e2(1), e2(2):end] ) = 0;
 
-figure; imshow(jointmask,[])
-
+if debugFlag
+    figure; imshow(jointmask,[])
+end
 
 end

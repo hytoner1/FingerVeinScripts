@@ -21,15 +21,16 @@ figure;
     %% Work on miura images
     
     % Perform closing on the 'hazy' image
-SE = strel('disk', 2);
+SE = strel('disk', 1);
     % This could be switched to Gabor / Gaussian filtering ?
-v_rep_prcss  = imclose(v_repeated_line, SE);
+% v_rep_prcss  = imclose(v_repeated_line, SE);
+v_rep_prcss  = imgaussfilt(v_repeated_line, 2);
 
     % Remove the NaN, enhance, binarize, close
 v_rep_prcss2 = v_rep_prcss;
 v_rep_prcss2(isnan(v_rep_prcss2)) = 0;
 v_rep_prcss2 = imbinarize(im_enhance(v_rep_prcss2, fingermask));
-v_rep_prcss2 = imclose(v_rep_prcss2, SE);
+% v_rep_prcss2 = imclose(v_rep_prcss2, SE);
 
     % Find the largest connected component and remove the rest
 CC = bwconncomp(v_rep_prcss2);
@@ -48,7 +49,8 @@ CC_inv = bwconncomp(imcomplement(v_rep_prcss3));
     % Paint me like one of your french girls
 figure;
     CreateAxes(2,1,1);
-    imshow(bwmorph(v_rep_prcss3, 'skel', Inf), []);
+%     imshow(bwmorph(v_rep_prcss3, 'skel', Inf), []);
+    imshow(v_rep_prcss, [])
 
     CreateAxes(2,1,2);
-    imshow(v_rep_prcss3, []);
+    imshow(v_rep_prcss2, []);
