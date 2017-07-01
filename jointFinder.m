@@ -16,8 +16,20 @@ if strcmp(img_data.class, 'uint8')
 end
 
 %% Mask the finger image
+    % Weigh the mask by a cosine function to get rid of some noise on the edges
+    uedge = find( imfilter(fingerMask, [-1;1]) == 1 );
+    ledge = find( imfilter(fingerMask, [1;-1]) == 1 );
+    wedge = ledge - uedge;
+    medge = uedge + round(wedge./2) ;
+        
+cosines = zeros(size(img));
 
-img_m = img .* fingerMask;
+for i = 1:length(uedge)
+    cosines(uedge(i):ledge(i)-1) = cos(pi * linspace(0, wedge(i), wedge(i))./wedge(i)...
+                                           - pi/2 );
+end
+
+img_m = img .* cosines;
 
 %% Find the joint location on the basis of column-wise intensity level
 
