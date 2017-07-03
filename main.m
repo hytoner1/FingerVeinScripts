@@ -2,7 +2,7 @@
   % Once a part of project is completed, it can be admitted here 
  
 %clear variables; 
-close all;
+%close all;
 addpath(genpath('.'));
 
 saveFlag = 0; % Saveflag for images
@@ -100,5 +100,14 @@ miura_like_stuff;
 
 %% Skeletonization and branching points extraction
 
+im=v_rep_prcss2;
 skel_and_branch
+
+%% Plotting point clouds to be matched
+ u=branchp;
+% v=branchp;
+figure, 
+scatter(u(:,2),-u(:,1),'b')
+hold on
+scatter(v(:,2),-v(:,1),'r')
 

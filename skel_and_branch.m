@@ -1,6 +1,6 @@
 %% Skeletonization
 
-skel= bwmorph(v_rep_prcss3,'skel',Inf); %skeletonized image
+skel= bwmorph(im,'skel',Inf); %skeletonized image
 figure, imshow(skel);
 B = bwmorph(skel, 'branchpoints');
 E = bwmorph(skel, 'endpoints');
@@ -14,7 +14,10 @@ for k = 1:length(x)
     distanceToBranchPt = min(D(B_loc));
     Dmask(D < distanceToBranchPt) = true;
 end
+
 skelD = skel - Dmask;
+%skelD=skelD.*jointMask; %uncomment if you want to use the joint mask
+
 figure, imshow(skelD);
 im_overlaid = im_enhanced + skelD;
 figure, imshow(im_overlaid,[])
