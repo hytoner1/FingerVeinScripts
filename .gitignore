@@ -14,9 +14,10 @@
 *.out
 *.synctex.gz
 *.m~
-*.fig
-*.png
 
 *.bbl
 
 *.blg
+
+Metadata.docs
+Thumbs.db
