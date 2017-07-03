@@ -1,4 +1,4 @@
-function jointmask = jointFinder(img, fingerMask)
+function jointmask = jointFinder(img, fingerMask, debugFlag)
 %% function jointMask = jointFinder(img, fingerMask)
 %   Searches for the location of joints in finger image img
 % INPUT:
@@ -15,21 +15,26 @@ if strcmp(img_data.class, 'uint8')
     img = im2double(img);
 end
 
-%% Mask the finger image
-    % Weigh the mask by a cosine function to get rid of some noise on the edges
-    uedge = find( imfilter(fingerMask, [-1;1]) == 1 );
-    ledge = find( imfilter(fingerMask, [1;-1]) == 1 );
-    wedge = ledge - uedge;
-    medge = uedge + round(wedge./2) ;
-        
-cosines = zeros(size(img));
-
-for i = 1:length(uedge)
-    cosines(uedge(i):ledge(i)-1) = cos(pi * linspace(0, wedge(i), wedge(i))./wedge(i)...
-                                           - pi/2 );
+if nargin < 3
+    debugFlag = 0;
 end
 
-img_m = img .* cosines;
+%% Mask the finger image
+    % Weigh the mask by a cosine function to get rid of some noise on the edges
+    uedge = find( imfilter(fingerMask, [-1;1]) == 1 ); % Upper edge of finger
+    ledge = find( imfilter(fingerMask, [1;-1]) == 1 ); % Lower -"-
+    wedge = ledge - uedge;                             % Width of -"-
+        
+weights = zeros(size(img));
+
+for i = 1:length(uedge)
+    weights(uedge(i):ledge(i)-1) =...
+        exp( -2.* abs(linspace(0, wedge(i), wedge(i))./wedge(i) - 0.5) );
+end
+
+img_m = img .* weights;
+
+%figure; imshow(weights,[]);
 
 %% Find the joint location on the basis of column-wise intensity level
 
@@ -58,8 +63,9 @@ IfiltZeros = Ifilt(zeroInd);    % Intensity values at zero crossings
 [~, ordered] = sort(IfiltZeros , 'descend' );
 
     % Plot intensity and zero crossings
-figure; plot(Ifilt); hold on; plot(zeroInd, Ifilt(zeroInd),'x')
-
+if debugFlag
+    figure; plot(Ifilt); hold on; plot(zeroInd, Ifilt(zeroInd),'x')
+end
 
 %% Find most probable joint locations
 
@@ -78,7 +84,9 @@ med = median( Ifilt(jLoc(1):jLoc(2)) );
     % Everything below median can't be joint
 IfiltT = Ifilt .* (Ifilt >= med);
 
-figure; plot(IfiltT);
+if debugFlag
+    figure; plot(IfiltT);
+end
 
     % Search for the edges of the joints as area that is above the
     % threshold, but not above the value at joint location
@@ -107,7 +115,8 @@ end
 jointmask = fingerMask;
 jointmask(:, [1:e1(1), e1(2):e2(1), e2(2):end] ) = 0;
 
-figure; imshow(jointmask,[])
-
+if debugFlag
+    figure; imshow(jointmask,[])
+end
 
 end

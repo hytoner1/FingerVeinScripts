@@ -1,4 +1,4 @@
-function [im_enhanced, nanmask] = im_enhance(im, nanmask)
+function [im_enhanced, nanmask] = im_enhance(im, step, bs, nanmask)
 
 %{
 Enhance image basing on the Kumar Zhou paper:
@@ -12,7 +12,7 @@ provided during the function call.
 [height, width] = size(im);
 
 %% Laplacian of Gaussian filtering and Canny edge detection
-if nargin==1
+if nargin<4
   
     h = fspecial('log', 20, 2);
     im_filt = imfilter(im, h, 'replicate');
@@ -34,8 +34,8 @@ if nargin==1
     
 end
 %% Block average filtering
-step = 5; % number of pixels from start of one block to start of the other
-bs = 15; % half of block size
+% step = 5; % number of pixels from start of one block to start of the other
+% bs = 15; % half of block size
 im_nan = im .* nanmask; %original image masked with NaN outside the finger region
 im_pad = padarray(im_nan,[bs bs], 'replicate'); %padded image
 [h, w] = size(im_pad);
