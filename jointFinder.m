@@ -21,19 +21,20 @@ end
 
 %% Mask the finger image
     % Weigh the mask by a cosine function to get rid of some noise on the edges
-    uedge = find( imfilter(fingerMask, [-1;1]) == 1 );
-    ledge = find( imfilter(fingerMask, [1;-1]) == 1 );
-    wedge = ledge - uedge;
-    medge = uedge + round(wedge./2) ;
+    uedge = find( imfilter(fingerMask, [-1;1]) == 1 ); % Upper edge of finger
+    ledge = find( imfilter(fingerMask, [1;-1]) == 1 ); % Lower -"-
+    wedge = ledge - uedge;                             % Width of -"-
         
-cosines = zeros(size(img));
+weights = zeros(size(img));
 
 for i = 1:length(uedge)
-    cosines(uedge(i):ledge(i)-1) = cos(pi * linspace(0, wedge(i), wedge(i))./wedge(i)...
-                                           - pi/2 );
+    weights(uedge(i):ledge(i)-1) =...
+        exp( -2.* abs(linspace(0, wedge(i), wedge(i))./wedge(i) - 0.5) );
 end
 
-img_m = img .* cosines;
+img_m = img .* weights;
+
+%figure; imshow(weights,[]);
 
 %% Find the joint location on the basis of column-wise intensity level
 

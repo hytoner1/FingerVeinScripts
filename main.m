@@ -5,6 +5,8 @@ clear variables; close all;
 addpath(genpath('.'));
 
 saveFlag = 0; % Saveflag for images
+figPos   = [495 259 858 471]; % Position for the figures on screen
+
 
 %% file handling - function usage
 datapath = [pwd '/images']; % specify directory containing the folders with images
@@ -25,7 +27,7 @@ SaveCurrentFig(saveFlag, 1, '~/Desktop/PicsForPres/', 'orig', '-dpng');
 
 %% Enhancement
 im = image0.image;  % Read the image
-[im_enhanced, fingermask] = im_enhance(im2double(im));  % Enhance it
+[im_enhanced, fingermask] = im_enhance(im2double(im), 5, 15);  % Enhance it
 fingermask_zeros = ~isnan(fingermask);	% Create a version where NaN -> 0
 
     % Show enhanced image
@@ -98,7 +100,7 @@ SaveCurrentFig(saveFlag, 1, '~/Desktop/PicsForPres/', 'gabor', '-dpng');
 miura_like_stuff;
 
 %%
-skel= bwmorph(v_rep_prcss3,'skel',Inf); %scheletonized image
+skel= bwmorph(v_rep_prcss3,'skel',Inf); %skeletonized image
 figure, imshow(skel);
 B = bwmorph(skel, 'branchpoints');
 E = bwmorph(skel, 'endpoints');
