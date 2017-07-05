@@ -34,7 +34,7 @@ end
 
 img_m = img .* weights;
 
-%figure; imshow(weights,[]);
+% figure; imshow(weights,[]);
 
 %% Find the joint location on the basis of column-wise intensity level
 
@@ -93,8 +93,9 @@ end
 e1 = [nan, nan];
 e2 = [nan, nan];
 
-for i = 1:size(img,2)/3
-    if isnan(e1(1)) && (jLoc(1)-i == 1 || IfiltT(jLoc(1)-i) == 0 || IfiltT(jLoc(1)-i) > IfiltT(jLoc(1)))
+for i = 1:size(img,2)/2
+    if isnan(e1(1)) && (jLoc(1)-i  < round(size(img,2)*0.1) ||...
+                        IfiltT(jLoc(1)-i) == 0 || IfiltT(jLoc(1)-i) > IfiltT(jLoc(1)))
         e1(1) = jLoc(1)-i;
     end
     if isnan(e1(2)) && (IfiltT(jLoc(1)+i) == 0 || IfiltT(jLoc(1)+i) > IfiltT(jLoc(1)))
@@ -104,7 +105,8 @@ for i = 1:size(img,2)/3
     if isnan(e2(1)) && (IfiltT(jLoc(2)-i) == 0 || IfiltT(jLoc(2)-i) > IfiltT(jLoc(2)))
         e2(1) = jLoc(2)-i;
     end
-    if isnan(e2(2)) && (IfiltT(jLoc(2)+i) == size(img,2) || IfiltT(jLoc(2)+i) > IfiltT(jLoc(2)))
+    if isnan(e2(2)) && (jLoc(2)+i > round(size(img,2)*0.9) ||...
+                        IfiltT(jLoc(2)+i) > IfiltT(jLoc(2)))
         e2(2) = jLoc(2)+i;
     end
 end

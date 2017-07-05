@@ -1,8 +1,8 @@
 %% Here is the main script for the project.
   % Once a part of project is completed, it can be admitted here 
  
-%clear variables; 
-%close all;
+clear variables; 
+close all;
 addpath(genpath('.'));
 
 saveFlag = 0; % Saveflag for images
@@ -41,7 +41,7 @@ figure();
 SaveCurrentFig(saveFlag, 1, '~/Desktop/PicsForPres/', 'kumar-zhou', '-dpng');
 
 %% Create masks for joint regions    
-jointMask = jointFinder(im, fingermask_zeros, 0);   % Find the mask for joint regions
+jointMask = jointFinder(im, fingermask_zeros, false);   % Find the mask for joint regions
 img_jMasked= im2double(im) .* jointMask;            % Apply it for the orig image
  
     % Show the masked orig image
