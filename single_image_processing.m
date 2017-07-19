@@ -85,4 +85,7 @@ miura_like_stuff;
 %% Skeletonization and branching points extraction
 
 im=v_rep_prcss2;
-skel_and_branch
+skel_and_branch;
+
+%% Regions - DD
+regions_description; %uses: im=v_rep_prcss2, skelD, jointMask or jointFinder

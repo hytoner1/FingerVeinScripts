@@ -32,18 +32,24 @@ image2 = get_image(immap, 'participant', id2, 'finger', fing2,...
     'measurement', meas2);
 
 %% processing
+use_joint_mask = true; %for regions extraction
+
 image0 = image1;
 single_image_processing;
-u = branchp;
+% u = branchp;
+L1 = Lfinal; stats1 = stats_valid; skelD1 = skelD;
 
 image0 = image2;
 single_image_processing;
-v = branchp;
-
+% v = branchp;
+L2 = Lfinal; stats2 = stats_valid; skelD2 = skelD;
 
 %% Plotting point clouds to be matched
+%{
 figure();
 scatter(u(:,2),-u(:,1),'b')
 hold on
 scatter(v(:,2),-v(:,1),'r')
-
+%}
+%% Regions matching
+regions_matching;
