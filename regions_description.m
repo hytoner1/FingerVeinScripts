@@ -2,7 +2,7 @@ if exist('use_joint_mask', 'var')==0
     use_joint_mask=false;
 end
 
-
+figure();
 % close the areas - use boundaries of the jointMask
 % or introduce left and right vertical edges
 if use_joint_mask
@@ -43,7 +43,7 @@ figure();
 subplot(221); imshow(label2rgb(L)); title('all found regions');
 
 
-stats = regionprops('table', cc, 'Centroid', 'Eccentricity', 'Area', 'EulerNumber');
+stats = regionprops('table', cc, 'Centroid', 'Eccentricity', 'Area', 'Orientation');
 areas = [stats.Area];
 th_low = 500; th_high = 50000;
 idx = find(areas>th_low & areas<th_high);
@@ -74,3 +74,6 @@ figure(); imshow(Lfinal_rgb);
 cent = table2array(stats_valid(:,'Centroid'));
 hold on; plot(cent(:,1), cent(:,2), 'k*');
 suptitle('Centroids of the chosen regions');
+
+%% rectify centroids array
+cent_rectified = tformfwd(maketform('affine', rect_tform.T), cent);

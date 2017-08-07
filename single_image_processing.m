@@ -10,7 +10,7 @@ SaveCurrentFig(saveFlag, 1, '~/Desktop/PicsForPres/', 'orig', '-dpng');
 
 %% Enhancement
 im = image0.image;  % Read the image
-[im_enhanced, fingermask] = im_enhance(im2double(im), 5, 15);  % Enhance it
+[im_enhanced, fingermask, im_edge] = im_enhance(im2double(im), 5, 15);  % Enhance it
 fingermask_zeros = ~isnan(fingermask);	% Create a version where NaN -> 0
 
     % Show enhanced image
@@ -23,7 +23,7 @@ figure();
 SaveCurrentFig(saveFlag, 1, '~/Desktop/PicsForPres/', 'kumar-zhou', '-dpng');
 
 %% Create masks for joint regions    
-jointMask = jointFinder(im, fingermask_zeros, false);   % Find the mask for joint regions
+[jointMask, jLoc] = jointFinder(im, fingermask_zeros, false);   % Find the mask for joint regions
 img_jMasked= im2double(im) .* jointMask;            % Apply it for the orig image
  
     % Show the masked orig image
@@ -84,8 +84,14 @@ miura_like_stuff;
 
 %% Skeletonization and branching points extraction
 
-im=v_rep_prcss2;
+im=bwmorph(v_rep_prcss2, 'bridge', Inf);
 skel_and_branch;
 
-%% Regions - DD
-regions_description; %uses: im=v_rep_prcss2, skelD, jointMask or jointFinder
+%% compute tform for recification of images (skelD) and point sets (branchp)
+rect_tform = get_rect_tform(im_edge, jLoc);
+%% Regions
+regions_description; %uses: im=v_rep_prcss2, skelD, jointMask or jointFinder, rect_tform
+
+%%
+branchp_rectified = tformfwd(maketform('affine', rect_tform.T), branchp);
+skelD_rectified = imwarp(skelD, rect_tform, 'OutputView', imref2d(size(skelD))) > 0;

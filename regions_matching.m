@@ -1,59 +1,35 @@
 % close all;
-vars = {'Centroid'};
-% vars = {'Centroid', 'Area'}; %choose variables according to which the regions (represented by points) are matched
-fmatch1 = table2array(stats1(:,vars));
-fmatch2 = table2array(stats2(:,vars));
-[k1, d1] = dsearchn(fmatch2, fmatch1);
-[k2, d2] = dsearchn(fmatch1, fmatch2);
-figure();
-cent1 = table2array(stats1(:,'Centroid'));
-cent1 = mat2gray(cent1-mean(cent1)); %whitening
-plot(cent1(:,1), cent1(:,2), 'b*');
-cent2 = table2array(stats2(:,'Centroid'));
-cent2 = mat2gray(cent2-mean(cent2));
-hold on; plot(cent2(:,1), cent2(:,2), 'r*');
+% vars = {}; % use only rectified centroids
+vars = {'Area', 'Eccentricity', 'Orientation'}; % use centroids + other variables
+fmatch2 = cat(2, cent_rect1, normc(table2array(stats1(:,vars))));
+fmatch1 = cat(2, cent_rect2, normc(table2array(stats2(:,vars))));
+[indexPairs, matchmetric] = matchFeatures(fmatch1, fmatch2, 'Unique', true, 'MaxRatio', 0.8);
+matchmetric_threshold = 1.5*median(matchmetric);
 
+skelD_rect_zeromask = sum(skelD_rect_comp,3)==0;
+skelD_rect_background = skelD_rect_comp + skelD_rect_zeromask;
+figure(); imshow(skelD_rect_background); hold on;
+plot(cent_rect1(:,1), cent_rect1(:,2), 'r*');
+plot(cent_rect2(:,1), cent_rect2(:,2), 'b*');
 
-d_th = 0.3*mean([median(d1), median(d2)]);
-perf1 = [];
-for i=1:numel(k1)
-    if d1(i)<d_th
-        plot([cent1(i,1),cent2(k1(i),1)], [cent1(i,2),cent2(k1(i),2)], 'b-')
-        perf1 = [perf1, i];
+matchedPoints1 = fmatch1(indexPairs(:,1),1:2);
+matchedPoints2 = fmatch2(indexPairs(:,2),1:2);
+
+matchedPoints_xx = [matchedPoints1(:,1), matchedPoints2(:,1)];
+matchedPoints_yy = [matchedPoints1(:,2), matchedPoints2(:,2)];
+    
+for i=1:length(indexPairs)
+    xx = matchedPoints_xx(i,:);
+    yy = matchedPoints_yy(i,:);
+    if matchmetric(i) < matchmetric_threshold
+        plot(xx, yy, 'k-');
     else
-        plot([cent1(i,1),cent2(k1(i),1)], [cent1(i,2),cent2(k1(i),2)], 'b-.')
+        plot(xx, yy, 'k-');
     end
 end
 
-perf2 = [];
-for i=1:numel(k2)
-    if d2(i)<d_th
-        plot([cent2(i,1),cent1(k2(i),1)], [cent2(i,2),cent1(k2(i),2)], 'r-')
-        perf2 = [perf2, i];
-    else
-        plot([cent2(i,1),cent1(k2(i),1)], [cent2(i,2),cent1(k2(i),2)], 'r-.')
-    end
-end
+figure(); stem(matchmetric); refline(0, matchmetric_threshold);
+title('Distances between the matched point pairs');
 
-title('Centroids of 1 (in blue) and 2 (in red)');
-
-figure(); hold on;
-for i = 1:max(unique(L1))
-    single_region = L1==i;
-    single_region_boundary_cell = bwboundaries(single_region);
-    single_region_boundary = single_region_boundary_cell{1,1};
-    numpoints = size(single_region_boundary,1);
-    ith_area = table2array(stats1(i,'Area'));
-    ith_area_vector = ones(numpoints,1)*ith_area;
-    scatter3(single_region_boundary(:,2), single_region_boundary(:,1),ith_area_vector,0.1,'b');
-end
-
-for i = 1:max(unique(L2))
-    single_region = L2==i;
-    single_region_boundary_cell = bwboundaries(single_region);
-    single_region_boundary = single_region_boundary_cell{1,1};
-    numpoints = size(single_region_boundary,1);
-    ith_area = table2array(stats2(i,'Area'));
-    ith_area_vector = ones(numpoints,1)*ith_area;
-    scatter3(single_region_boundary(:,2), single_region_boundary(:,1),ith_area_vector,0.1,'r');
-end
+% I1 = skelD_rect1; I2 = skelD_rect2;
+% figure; showMatchedFeatures(I1,I2,matchedPoints1,matchedPoints2);
