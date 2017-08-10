@@ -1,4 +1,4 @@
-function [jointmask, jLoc] = jointFinder(img, fingerMask, debugFlag)
+function jointmask = jointFinder(img, fingerMask, debugFlag)
 %% function jointMask = jointFinder(img, fingerMask)
 %   Searches for the location of joints in finger image img
 % INPUT:
@@ -6,7 +6,9 @@ function [jointmask, jLoc] = jointFinder(img, fingerMask, debugFlag)
 %   fingerMask (optional): binary mask of the fonger to filter bg out
 % Output:
 %   jointMask: binary mask showing the location of two joints [left, right]
-
+% fingerMask = fingermask_zeros; 
+% debugFlag = 1;
+% img = im;
 if nargin == 1
     fingerMask = ones(size( img ));
 end
@@ -38,7 +40,7 @@ img_m = img .* weights;
 
 %% Find the joint location on the basis of column-wise intensity level
 
-I = sum( img_m ) ./ sum(img_m ~= 0) ;
+I = sum( img_m ) ./ sum(img_m ~= 0) ;  % Mean per coloumn
 
     % Mean filter to get rid of some saddle points
 n = 10; % Width of the mean filter
@@ -80,6 +82,10 @@ jLoc(2) = zeroInd(ordered(1));
 %% Find joint widths
 
     % Median value between joint locations
+if(jLoc(1) > jLoc(2))
+    jLoc = fliplr(jLoc);    % sort asc 
+end
+
 med = median( Ifilt(jLoc(1):jLoc(2)) );
     % Everything below median can't be joint
 IfiltT = Ifilt .* (Ifilt >= med);
@@ -105,7 +111,7 @@ for i = 1:size(img,2)/2
     if isnan(e2(1)) && (IfiltT(jLoc(2)-i) == 0 || IfiltT(jLoc(2)-i) > IfiltT(jLoc(2)))
         e2(1) = jLoc(2)-i;
     end
-    if isnan(e2(2)) && (jLoc(2)+i > round(size(img,2)*0.9) ||...
+    if isnan(e2(2)) && (jLoc(2)+i > round(size(img,2)*0.7) ||...
                         IfiltT(jLoc(2)+i) > IfiltT(jLoc(2)))
         e2(2) = jLoc(2)+i;
     end
