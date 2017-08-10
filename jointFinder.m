@@ -1,4 +1,4 @@
-function jointmask = jointFinder(img, fingerMask, debugFlag)
+function [jointmask, jLoc] = jointFinder(img, fingerMask, debugFlag)
 %% function jointMask = jointFinder(img, fingerMask)
 %   Searches for the location of joints in finger image img
 % INPUT:

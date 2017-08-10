@@ -1,4 +1,4 @@
-function [im_enhanced, nanmask] = im_enhance(im, step, bs, nanmask)
+function [im_enhanced, nanmask, im_filt] = im_enhance(im, step, bs, nanmask)
 
 %{
 Enhance image basing on the Kumar Zhou paper:
